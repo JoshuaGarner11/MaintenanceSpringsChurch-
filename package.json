@@ -1,0 +1,39 @@
+{
+  "name": "springs-maintenance",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "db:migrate": "prisma migrate deploy",
+    "db:dev": "prisma migrate dev",
+    "import:maintainx": "tsx scripts/import-maintainx.ts",
+    "scheduler": "tsx scripts/scheduler.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "test": "tsx --test lib/*.test.ts",
+    "download:files": "tsx scripts/download-files.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "csv-parse": "6.1.0",
+    "next": "15.5.28",
+    "nodemailer": "7.0.10",
+    "qrcode": "1.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "tsx": "4.20.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.14",
+    "@types/node": "22.18.8",
+    "@types/nodemailer": "7.0.2",
+    "@types/qrcode": "1.5.5",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.11",
+    "prisma": "6.19.3",
+    "tailwindcss": "4.1.14",
+    "typescript": "5.9.3"
+  }
+}

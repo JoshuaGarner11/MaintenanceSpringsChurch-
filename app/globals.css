@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eef7f6;
+  --color-brand-100: #d5ecea;
+  --color-brand-600: #1f7a73;
+  --color-brand-700: #17625c;
+  --color-brand-800: #124d48;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: #f4f5f7;
+  color: #1c2430;
+}
+
+input, select, textarea {
+  font-size: 16px; /* stops iOS zooming into fields */
+}
