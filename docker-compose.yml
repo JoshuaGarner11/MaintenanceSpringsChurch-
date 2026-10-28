@@ -1,0 +1,54 @@
+# Runs on the church Synology NAS with Container Manager (or any Docker host).
+# Copy .env.example to .env, fill it in, then: docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maint
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: maint
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maint"]
+      interval: 10s
+      retries: 5
+
+  app:
+    build: .
+    image: springs-maintenance
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://maint:${POSTGRES_PASSWORD}@db:5432/maint
+    volumes:
+      - ./data/uploads:/data/uploads
+      - ./import:/import:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  scheduler:
+    image: springs-maintenance
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://maint:${POSTGRES_PASSWORD}@db:5432/maint
+    command: ["npm", "run", "scheduler"]
+    depends_on:
+      - app
+
+  # Gives phones a secure public address without opening router ports.
+  # Create a tunnel in the Cloudflare dashboard pointing at http://app:3000 and put its token in .env.
+  tunnel:
+    image: cloudflare/cloudflared:2024.12.2
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    profiles: ["tunnel"]
+    depends_on:
+      - app

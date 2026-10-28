@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TECHNICIAN
+  VIEWER
+}
+
+enum WorkType {
+  REACTIVE
+  PREVENTIVE
+}
+
+enum Priority {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum WorkStatus {
+  OPEN
+  IN_PROGRESS
+  ON_HOLD
+  DONE
+}
+
+enum Criticality {
+  NORMAL
+  IMPORTANT
+  CRITICAL
+}
+
+enum AssetStatus {
+  WORKING
+  DOWN
+}
+
+enum ChecklistItemKind {
+  CHECKBOX
+  PASS_FAIL
+  NUMBER
+  TEXT
+}
+
+enum RepeatUnit {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  role       Role     @default(TECHNICIAN)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  sessions   Session[]
+  loginCodes LoginCode[]
+  assigned   WorkOrderAssignee[]
+  completed  WorkOrder[] @relation("CompletedBy")
+  created    WorkOrder[] @relation("CreatedBy")
+  comments   Comment[]
+  schedules  PmSchedule[]
+  pushSubscriptions PushSubscription[]
+}
+
+// A phone or browser that asked for push alerts (one row per device).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model LoginCode {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Location {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  qrCode      String?
+  parentId    String?
+  parent      Location?   @relation("LocationTree", fields: [parentId], references: [id])
+  children    Location[]  @relation("LocationTree")
+  assets      Asset[]
+  parts       Part[]
+  workOrders  WorkOrder[]
+  schedules   PmSchedule[]
+  attachments Attachment[]
+  maintainxId String?     @unique
+  createdAt   DateTime    @default(now())
+}
+
+model Asset {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  type         String?
+  criticality  Criticality @default(NORMAL)
+  status       AssetStatus @default(WORKING)
+  manufacturer String?
+  model        String?
+  serialNumber String?
+  year         String?
+  barcode      String?
+  locationId   String?
+  location     Location?   @relation(fields: [locationId], references: [id])
+  parentId     String?
+  parent       Asset?      @relation("AssetTree", fields: [parentId], references: [id])
+  children     Asset[]     @relation("AssetTree")
+  vendorId     String?
+  vendor       Vendor?     @relation(fields: [vendorId], references: [id])
+  needsReview  Boolean     @default(false)
+  workOrders   WorkOrder[]
+  schedules    PmSchedule[]
+  parts        Part[]
+  attachments  Attachment[]
+  maintainxId  String?     @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Vendor {
+  id          String      @id @default(cuid())
+  name        String
+  contactName String?
+  email       String?
+  phone       String?
+  notes       String?
+  assets      Asset[]
+  workOrders  WorkOrder[]
+  schedules   PmSchedule[]
+  parts       Part[]
+  maintainxId String?     @unique
+  createdAt   DateTime    @default(now())
+}
+
+model Part {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  area         String?
+  locationId   String?
+  location     Location?  @relation(fields: [locationId], references: [id])
+  assets       Asset[]
+  inStock      Int        @default(0)
+  minimum      Int        @default(0)
+  unitCostCents Int?
+  vendorId     String?
+  vendor       Vendor?    @relation(fields: [vendorId], references: [id])
+  leadTimeDays Int?
+  critical     Boolean    @default(false)
+  usages       PartUsage[]
+  maintainxId  String?    @unique
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ChecklistTemplate {
+  id         String          @id @default(cuid())
+  name       String          @unique
+  items      ChecklistItem[]
+  schedules  PmSchedule[]
+  workOrders WorkOrder[]
+  createdAt  DateTime        @default(now())
+}
+
+model ChecklistItem {
+  id         String            @id @default(cuid())
+  templateId String
+  template   ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  label      String
+  kind       ChecklistItemKind @default(CHECKBOX)
+  position   Int
+}
+
+model PmSchedule {
+  id             String             @id @default(cuid())
+  title          String
+  description    String?
+  priority       Priority           @default(MEDIUM)
+  every          Int                @default(1)
+  unit           RepeatUnit         @default(YEAR)
+  leadDays       Int                @default(14)
+  nextDue        DateTime
+  active         Boolean            @default(true)
+  assetId        String?
+  asset          Asset?             @relation(fields: [assetId], references: [id])
+  locationId     String?
+  location       Location?          @relation(fields: [locationId], references: [id])
+  vendorId       String?
+  vendor         Vendor?            @relation(fields: [vendorId], references: [id])
+  assigneeId     String?
+  assignee       User?              @relation(fields: [assigneeId], references: [id])
+  checklistId    String?
+  checklist      ChecklistTemplate? @relation(fields: [checklistId], references: [id])
+  categories     String[]
+  workOrders     WorkOrder[]
+  createdAt      DateTime           @default(now())
+}
+
+model WorkOrder {
+  id            String              @id @default(cuid())
+  number        Int                 @unique @default(autoincrement())
+  title         String
+  description   String?
+  type          WorkType            @default(REACTIVE)
+  priority      Priority            @default(NONE)
+  status        WorkStatus          @default(OPEN)
+  categories    String[]
+  dueDate       DateTime?
+  locationId    String?
+  location      Location?           @relation(fields: [locationId], references: [id])
+  assetId       String?
+  asset         Asset?              @relation(fields: [assetId], references: [id])
+  vendorId      String?
+  vendor        Vendor?             @relation(fields: [vendorId], references: [id])
+  scheduleId    String?
+  schedule      PmSchedule?         @relation(fields: [scheduleId], references: [id])
+  checklistId   String?
+  checklist     ChecklistTemplate?  @relation(fields: [checklistId], references: [id])
+  followUpOfId  String?
+  followUpOf    WorkOrder?          @relation("FollowUp", fields: [followUpOfId], references: [id])
+  followUps     WorkOrder[]         @relation("FollowUp")
+  assignees     WorkOrderAssignee[]
+  answers       ChecklistAnswer[]
+  partsUsed     PartUsage[]
+  comments      Comment[]
+  attachments   Attachment[]
+  minutesSpent  Int                 @default(0)
+  otherCostCents Int                @default(0)
+  createdById   String?
+  createdBy     User?               @relation("CreatedBy", fields: [createdById], references: [id])
+  completedById String?
+  completedBy   User?               @relation("CompletedBy", fields: [completedById], references: [id])
+  completedAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  maintainxId   String?             @unique
+  // Set when the order came from the public "Report a problem" page.
+  reported      Boolean             @default(false)
+  reporterName  String?
+  reporterContact String?
+  reporterIp    String?
+
+  @@index([status, dueDate])
+}
+
+model WorkOrderAssignee {
+  workOrderId String
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workOrderId, userId])
+}
+
+model ChecklistAnswer {
+  id          String            @id @default(cuid())
+  workOrderId String
+  workOrder   WorkOrder         @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  label       String
+  kind        ChecklistItemKind
+  position    Int
+  value       String?
+  note        String?
+}
+
+model PartUsage {
+  id          String    @id @default(cuid())
+  workOrderId String
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  partId      String
+  part        Part      @relation(fields: [partId], references: [id])
+  quantity    Int
+  createdAt   DateTime  @default(now())
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  workOrderId String
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  body        String
+  createdAt   DateTime  @default(now())
+}
+
+model Attachment {
+  id          String     @id @default(cuid())
+  fileName    String
+  mimeType    String
+  storageKey  String?
+  sourceUrl   String?
+  workOrderId String?
+  workOrder   WorkOrder? @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  assetId     String?
+  asset       Asset?     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  locationId  String?
+  location    Location?  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+}
+
+// Paintings shown across the top of the office TV board.
+model Artwork {
+  id         String   @id @default(cuid())
+  title      String
+  artist     String?
+  credit     String?
+  storageKey String   @unique
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
