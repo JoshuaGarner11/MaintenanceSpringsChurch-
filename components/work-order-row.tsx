@@ -15,25 +15,29 @@ export function WorkOrderRow({ wo, now = new Date() }: { wo: Row; now?: Date }) 
   const where = [wo.asset?.name, wo.location?.name].filter(Boolean).join(" · ");
   return (
     <ListLink href={`/work-orders/${wo.number}`}>
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium">{wo.title}</div>
-          <div className="truncate text-sm text-slate-500">
-            #{wo.number}
+          <div className="truncate font-medium text-slate-950">{wo.title}</div>
+          <div className="mt-0.5 truncate text-[13px] text-slate-500">
+            <span className="font-mono text-[12px] text-slate-400">#{wo.number}</span>
             {where && ` · ${where}`}
             {wo.assignees.length > 0 && ` · ${wo.assignees.map((a) => a.user.name.split(" ")[0]).join(", ")}`}
           </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <StatusBadge status={wo.status} />
+            <PriorityBadge priority={wo.priority} />
+            {wo.reported && wo.status === "OPEN" && <span className="text-xs font-medium text-amber-700">Reported via QR</span>}
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          <StatusBadge status={wo.status} />
+        <div className="shrink-0 pt-0.5 text-right text-xs tabular-nums">
           {wo.dueDate && wo.status !== "DONE" && (
-            <span className={`text-xs ${overdue ? "font-semibold text-red-700" : "text-slate-500"}`}>
-              {overdue ? "Overdue · " : "Due "}
+            <span className={overdue ? "font-semibold text-red-700" : "text-slate-500"}>
+              {overdue ? "Overdue" : "Due"}
+              <br />
               {fmtDate(wo.dueDate)}
             </span>
           )}
-          {wo.status === "DONE" && wo.completedAt && <span className="text-xs text-slate-500">Done {fmtDate(wo.completedAt)}</span>}
-          <PriorityBadge priority={wo.priority} />
+          {wo.status === "DONE" && wo.completedAt && <span className="text-slate-500">Done<br />{fmtDate(wo.completedAt)}</span>}
         </div>
       </div>
     </ListLink>

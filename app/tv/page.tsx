@@ -94,7 +94,7 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
     [w.asset?.name, w.location && (w.location.parent ? `${w.location.parent.name} › ${w.location.name}` : w.location.name)].filter(Boolean).join(" · ");
 
   return (
-    <main className="flex h-dvh flex-col gap-[1vw] overflow-hidden bg-slate-950 p-[1.5vw] text-slate-100">
+    <main data-fixed-theme className="flex h-dvh flex-col gap-[1vw] overflow-hidden bg-slate-950 p-[1.5vw] text-slate-100">
       <AutoRefresh />
       <div className="relative -mx-[1.5vw] -mt-[1.5vw] flex flex-col gap-[1vw] overflow-hidden px-[1.5vw] pt-[1.5vw] pb-[1vw]">
         {painting && (

@@ -17,7 +17,7 @@ export function Attachments({ files }: { files: Attachment[] }) {
         </div>
       )}
       {docs.map((f) => (
-        <a key={f.id} href={`/files/${f.id}`} target="_blank" className="block truncate rounded-lg bg-white px-3 py-2 text-sm text-brand-700 ring-1 ring-slate-200">
+        <a key={f.id} href={`/files/${f.id}`} target="_blank" className="block truncate rounded-lg bg-surface px-3 py-2 text-sm text-brand-700 ring-1 ring-slate-200">
           {f.fileName}
         </a>
       ))}

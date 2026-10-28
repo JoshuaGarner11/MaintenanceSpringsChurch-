@@ -7,7 +7,7 @@ import { loginAction, type LoginState } from "./actions";
 export function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, { step: "email" });
   return (
-    <Card>
+    <Card className="p-5">
       <form action={action} className="space-y-4">
         {state.step === "email" ? (
           <Field label="Email">
@@ -28,7 +28,7 @@ export function LoginForm() {
                 maxLength={6}
                 required
                 autoFocus
-                className={`${input} text-center text-2xl tracking-[0.4em]`}
+                className={`${input} text-center font-mono text-2xl tracking-[0.5em]`}
               />
             </Field>
           </>

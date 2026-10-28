@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma, WorkStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { canEdit, requireUser } from "@/lib/auth";
+import { Icon } from "@/components/icon";
 import { btn, Empty, input, List, PageHeader } from "@/components/ui";
 import { WorkOrderRow, workOrderRowInclude } from "@/components/work-order-row";
 
@@ -44,28 +45,31 @@ export default async function WorkOrdersPage({ searchParams }: { searchParams: P
   };
   return (
     <>
-      <PageHeader title="Work orders" action={canEdit(user) && <Link href="/work-orders/new" className={btn}>+ New</Link>} />
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        {filters.map((x) => (
-          <Link
-            key={x.key}
-            href={link({ f: x.key })}
-            className={`rounded-full px-3 py-1 text-sm ${x.key === filter.key ? "bg-brand-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}
-          >
-            {x.label}
-          </Link>
-        ))}
+      <PageHeader title="Work orders" action={canEdit(user) && <Link href="/work-orders/new" className={btn}><Icon name="plus" className="h-4 w-4" />New</Link>} />
+      <div className="mb-3 flex items-center gap-2">
+        <div className="inline-flex rounded-xl bg-slate-200/60 p-1">
+          {filters.map((x) => (
+            <Link
+              key={x.key}
+              href={link({ f: x.key })}
+              className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${x.key === filter.key ? "bg-surface text-slate-950 shadow-soft" : "text-slate-600 hover:text-slate-900"}`}
+            >
+              {x.label}
+            </Link>
+          ))}
+        </div>
         <Link
           href={link({ mine: mine ? undefined : "1" })}
-          className={`rounded-full px-3 py-1 text-sm ${mine ? "bg-brand-600 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}
+          className={`rounded-xl px-3.5 py-2 text-sm font-medium transition ${mine ? "bg-brand-600 text-white shadow-soft" : "text-slate-600 ring-1 ring-slate-200 ring-inset hover:bg-slate-50"}`}
         >
           Mine
         </Link>
       </div>
-      <form className="mb-4">
+      <form className="relative mb-5">
         <input type="hidden" name="f" value={f} />
         {mine && <input type="hidden" name="mine" value={mine} />}
-        <input name="q" defaultValue={q} placeholder="Search title, asset or room" className={input} />
+        <Icon name="search" className="pointer-events-none absolute top-1/2 left-3.5 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" />
+        <input name="q" type="search" defaultValue={q} placeholder="Search title, asset or room" className={`${input} pl-10`} />
       </form>
       {rows.length === 0 ? (
         <Empty>No work orders match.</Empty>

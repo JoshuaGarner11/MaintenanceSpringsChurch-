@@ -73,7 +73,7 @@ export function WorkOrderForm({
         <legend className="mb-1 text-sm font-medium text-slate-700">Assign to</legend>
         <div className="flex flex-wrap gap-2">
           {options.users.map((u) => (
-            <label key={u.id} className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm has-checked:border-brand-600 has-checked:bg-brand-50">
+            <label key={u.id} className="flex items-center gap-2 rounded-lg border border-slate-300 bg-surface px-3 py-1.5 text-sm has-checked:border-brand-600 has-checked:bg-brand-50">
               <input type="checkbox" name="assigneeIds" value={u.id} defaultChecked={assigneeIds.includes(u.id)} />
               {u.name}
             </label>

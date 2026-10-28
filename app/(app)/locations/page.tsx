@@ -24,7 +24,7 @@ export default async function LocationsPage() {
         {top.map((area) => {
           const rooms = childrenOf(area.id);
           return (
-            <details key={area.id} className="group rounded-xl border border-slate-200 bg-white shadow-sm">
+            <details key={area.id} className="group rounded-xl border border-slate-200 bg-surface shadow-sm">
               <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3">
                 <span className="text-slate-400 transition group-open:rotate-90">›</span>
                 <Link href={`/locations/${area.id}`} className="flex-1 font-medium">{area.name}</Link>

@@ -10,7 +10,7 @@ export default async function AssetLabelPage({ params }: { params: Promise<{ id:
   if (!asset) notFound();
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="w-64 rounded-xl border-2 border-slate-800 bg-white p-4 text-center">
+      <div data-fixed-theme className="w-64 rounded-xl border-2 border-slate-800 bg-white p-4 text-center">
         <img src={`/qr?path=/assets/${asset.id}`} alt="QR code" className="mx-auto h-48 w-48" />
         <div className="mt-2 font-semibold">{asset.name}</div>
         {asset.location && <div className="text-sm text-slate-600">{asset.location.name}</div>}

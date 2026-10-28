@@ -83,16 +83,16 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ numb
   return (
     <>
       <PageHeader
-        title={`#${wo.number}`}
+        eyebrow={<span className="font-mono">Work order #{wo.number}</span>}
+        title={wo.title}
         back="/work-orders"
         action={editable && <Link href={`/work-orders/${wo.number}/edit`} className={btnSecondary}>Edit</Link>}
       />
       <Card className="mb-6">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <StatusBadge status={wo.status} />
           <PriorityBadge priority={wo.priority} />
         </div>
-        <h2 className="mb-2 text-lg font-semibold">{wo.title}</h2>
         {wo.description && <p className="mb-3 whitespace-pre-line text-slate-700">{wo.description}</p>}
         {wo.followUpOf && (
           <p className="mb-3 text-sm">
