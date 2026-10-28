@@ -1,5 +1,7 @@
 import { requireUser } from "@/lib/auth";
-import { List, ListLink, PageHeader } from "@/components/ui";
+import { Card, List, ListLink, PageHeader, Section } from "@/components/ui";
+import { PushToggle } from "@/components/push-toggle";
+import { vapidPublicKey } from "@/lib/notify";
 import { signOutAction } from "@/app/login/actions";
 
 export default async function MorePage() {
@@ -21,6 +23,15 @@ export default async function MorePage() {
           <ListLink key={href} href={href}>{text}</ListLink>
         ))}
       </List>
+      {user.role === "ADMIN" && (
+        <div className="mt-6">
+          <Section title="Problem report alerts">
+            <Card>
+              <PushToggle publicKey={vapidPublicKey()} />
+            </Card>
+          </Section>
+        </div>
+      )}
       <p className="mt-6 text-center text-sm text-slate-500">
         Signed in as {user.name} ({user.email})
       </p>

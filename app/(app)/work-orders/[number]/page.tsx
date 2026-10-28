@@ -66,6 +66,7 @@ export default async function WorkOrderPage({ params }: { params: Promise<{ numb
     ["Repeats", wo.schedule && <Link className="text-brand-700" href={`/schedules/${wo.schedule.id}`}>{describeRepeat(wo.schedule.every, wo.schedule.unit)}</Link>],
     ["Type", wo.type === "PREVENTIVE" ? "Preventive" : "Repair / one-off"],
     ["Categories", wo.categories.join(", ")],
+    ["Reported by", wo.reported && ([wo.reporterName, wo.reporterContact].filter(Boolean).join(" · ") || "Anonymous, from a QR sign")],
     ["Created", `${fmtDate(wo.createdAt)}${wo.createdBy ? ` by ${wo.createdBy.name}` : ""}`],
     ["Completed", done && `${fmtDate(wo.completedAt)}${wo.completedBy ? ` by ${wo.completedBy.name}` : ""}`],
     ["Time spent", wo.minutesSpent > 0 && `${(wo.minutesSpent / 60).toFixed(1)} h`],

@@ -13,6 +13,8 @@ inspections, assets, locations, parts and checklists, built for phones first.
 | Schedules | Repeat every N days/weeks/months/years; the work order is created a set number of days before it's due |
 | Assets | Details, photos, full history, parent/child (e.g. Horn Strobe is part of Fire Alarms), printable QR labels |
 | Locations | Areas and rooms with their history |
+| Report a problem | A printable QR sign per room (Locations → Report signs). Anyone scans it, picks what's wrong, adds a photo if they like, and it becomes a work order for that room. No sign-in. Repeat reports of the same problem are added to the open order |
+| Alerts | Admins get a push notification on their phone for each new report (More → Turn on alerts), or an email if they haven't turned alerts on |
 | Parts | Stock, minimums, restock and counts; stock drops when a part is logged on a work order |
 | Overview | Open, overdue, done this month, low stock, failed inspections with no repair |
 | People | Admin, technician, viewer; sign in with a 6-digit code emailed to them, no passwords |
@@ -22,10 +24,10 @@ A scheduler process creates due work orders every hour and emails admins a daily
 ## Running it on the NAS (Synology Container Manager)
 
 1. Copy this repository to the NAS, e.g. `/volume1/docker/maintenance`.
-2. Copy `.env.example` to `.env` and fill it in (database password, app address, email settings).
+2. Copy `.env.example` to `.env` and fill it in (database password, app address, email settings). For push alerts, run `npx web-push generate-vapid-keys` once (any computer with Node) and paste the two keys in.
 3. In Container Manager → Project → Create, point it at that folder; it uses `docker-compose.yml`. Or over SSH: `docker compose up -d --build`.
 4. Create the first admin: `docker compose exec app npm run create-admin -- "Vlad Lastname" vlad@example.org`
-5. Optional, for access away from church Wi-Fi: create a Cloudflare Tunnel to `http://app:3000`, put its token in `.env`, and run `docker compose --profile tunnel up -d`.
+5. For the QR report signs and push alerts, the app needs a public `https://` address (people scan on their mobile data, and phones only allow alerts over HTTPS). Create a Cloudflare Tunnel to `http://app:3000`, put its token in `.env`, and run `docker compose --profile tunnel up -d`.
 
 Data lives in `./data/postgres` and `./data/uploads`. Back up the whole folder with Hyper Backup.
 

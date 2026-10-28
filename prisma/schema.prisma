@@ -71,6 +71,18 @@ model User {
   created    WorkOrder[] @relation("CreatedBy")
   comments   Comment[]
   schedules  PmSchedule[]
+  pushSubscriptions PushSubscription[]
+}
+
+// A phone or browser that asked for push alerts (one row per device).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 }
 
 model Session {
@@ -255,6 +267,11 @@ model WorkOrder {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   maintainxId   String?             @unique
+  // Set when the order came from the public "Report a problem" page.
+  reported      Boolean             @default(false)
+  reporterName  String?
+  reporterContact String?
+  reporterIp    String?
 
   @@index([status, dueDate])
 }

@@ -16,7 +16,7 @@ const isActive = (path: string, href: string) => (href === "/" ? path === "/" : 
 export function BottomNav() {
   const path = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-20 print:hidden border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="mx-auto grid max-w-lg grid-cols-5">
         {tabs.map((t) => (
           <Link
@@ -49,7 +49,7 @@ const desktopLinks = [
 export function TopNav({ name }: { name: string }) {
   const path = usePathname();
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-20 print:hidden border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-2">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <img src="/icon.svg" alt="" className="h-7 w-7" />

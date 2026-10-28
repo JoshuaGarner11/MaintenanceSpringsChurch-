@@ -31,7 +31,10 @@ export default async function LocationPage({ params }: { params: Promise<{ id: s
       <Card className="mb-6">
         {loc.parent && <p className="mb-2 text-sm text-slate-500">In <Link className="text-brand-700" href={`/locations/${loc.parent.id}`}>{loc.parent.name}</Link></p>}
         {loc.description && <p className="mb-3 whitespace-pre-line text-slate-700">{loc.description}</p>}
-        {canEdit(user) && <Link href={`/work-orders/new?locationId=${loc.id}`} className={btn}>+ Work order here</Link>}
+        <div className="flex flex-wrap gap-2">
+          {canEdit(user) && <Link href={`/work-orders/new?locationId=${loc.id}`} className={btn}>+ Work order here</Link>}
+          <Link href={`/locations/${loc.id}/sign`} className={btnSecondary}>Print report sign</Link>
+        </div>
       </Card>
       {loc.children.length > 0 && (
         <Section title="Rooms">

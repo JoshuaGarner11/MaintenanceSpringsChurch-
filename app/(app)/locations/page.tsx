@@ -19,7 +19,7 @@ export default async function LocationsPage() {
     [l._count.assets && `${l._count.assets} assets`, l._count.workOrders && `${l._count.workOrders} open`].filter(Boolean).join(" · ");
   return (
     <>
-      <PageHeader title="Locations" />
+      <PageHeader title="Locations" action={<Link href="/locations/signs" className={btnSecondary}>Report signs</Link>} />
       <div className="space-y-3">
         {top.map((area) => {
           const rooms = childrenOf(area.id);
