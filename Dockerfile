@@ -8,4 +8,4 @@ COPY . .
 RUN npx prisma generate && npx next build
 ENV NODE_ENV=production PORT=3000 UPLOAD_DIR=/data/uploads
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && npx next start -p 3000"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run seed-art && npx next start -p 3000"]

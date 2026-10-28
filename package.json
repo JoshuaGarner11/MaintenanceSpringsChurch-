@@ -14,19 +14,21 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "test": "tsx --test lib/*.test.ts",
     "download:files": "tsx scripts/download-files.ts",
-    "vapid-keys": "tsx scripts/vapid-keys.ts"
+    "vapid-keys": "tsx scripts/vapid-keys.ts",
+    "seed-art": "tsx scripts/seed-art.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
     "csv-parse": "6.1.0",
     "next": "15.5.28",
-    "node-ical": "^0.27.3",
+    "node-ical": "0.27.3",
     "nodemailer": "7.0.10",
     "qrcode": "1.5.4",
     "react": "19.1.1",
     "react-dom": "19.1.1",
+    "sharp": "0.35.5",
     "tsx": "4.20.6",
-    "web-push": "^3.6.7"
+    "web-push": "3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.14",

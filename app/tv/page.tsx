@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { Priority } from "@prisma/client";
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
+import { pickForHour } from "@/lib/art";
 import { upcomingEvents, type CalEvent } from "@/lib/calendar";
 import { tvKeyOk } from "@/lib/tv";
 import { AutoRefresh, Clock } from "./auto-refresh";
@@ -63,7 +64,7 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
   const todayKey = localDay(now);
   const today = new Date(`${todayKey}T00:00:00Z`);
   const weekEnd = new Date(today.getTime() + 7 * DAY);
-  const [open, schedules, lowStock, doneThisWeek, cal] = await Promise.all([
+  const [open, schedules, lowStock, doneThisWeek, cal, art] = await Promise.all([
     db.workOrder.findMany({
       where: { status: { not: "DONE" } },
       include: { location: { include: { parent: true } }, asset: true, assignees: { include: { user: true } } },
@@ -77,7 +78,9 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
     db.$queryRaw<{ name: string; inStock: number; minimum: number }[]>`SELECT name, "inStock", minimum FROM "Part" WHERE "inStock" < minimum ORDER BY name`,
     db.workOrder.count({ where: { status: "DONE", completedAt: { gte: new Date(today.getTime() - 7 * DAY) } } }),
     upcomingEvents(7),
+    db.artwork.findMany({ where: { active: true }, select: { id: true, title: true, artist: true, credit: true }, orderBy: { createdAt: "asc" } }),
   ]);
+  const painting = pickForHour(art, now);
 
   const overdue = open.filter((w) => w.dueDate && woDay(w.dueDate) < todayKey);
   const reports = open.filter((w) => w.reported && w.status === "OPEN");
@@ -93,7 +96,17 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
   return (
     <main className="flex h-dvh flex-col gap-[1vw] overflow-hidden bg-slate-950 p-[1.5vw] text-slate-100">
       <AutoRefresh />
-      <header className="flex items-center justify-between">
+      <div className="relative -mx-[1.5vw] -mt-[1.5vw] flex flex-col gap-[1vw] overflow-hidden px-[1.5vw] pt-[1.5vw] pb-[1vw]">
+        {painting && (
+          <>
+            <img src={`/tv/art/${painting.id}`} alt="" className="absolute inset-0 -z-0 h-full w-full object-cover object-[center_45%]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-transparent to-slate-950" />
+            <div className="absolute right-[1.5vw] bottom-[0.3vw] text-[0.85vw] text-slate-300/80 italic">
+              {painting.title}{painting.artist && ` · ${painting.artist}`}{painting.credit && ` · ${painting.credit}`}
+            </div>
+          </>
+        )}
+      <header className="relative flex items-center justify-between [text-shadow:0_2px_8px_rgb(0_0_0/0.6)]">
         <div className="flex items-center gap-[1vw]">
           <img src="/icon.svg" alt="" className="h-[3.5vw] w-[3.5vw]" />
           <div>
@@ -104,19 +117,20 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
         <Clock />
       </header>
 
-      <div className="grid grid-cols-5 gap-[1vw]">
+      <div className={`relative grid grid-cols-5 gap-[1vw] ${painting ? "mt-[4.5vw] mb-[1.2vw]" : ""}`}>
         <Tile label="New problem reports" value={reports.length} tone="bg-amber-500 text-amber-950" />
         <Tile label="Overdue" value={overdue.length} tone="bg-red-600 text-white" />
         <Tile label="Due in the next 7 days" value={coming.length} tone="bg-sky-700 text-white" />
         <Tile label="Parts low on stock" value={lowStock.length} tone="bg-violet-700 text-white" />
         <Tile label="Finished this week" value={doneThisWeek} tone="bg-emerald-700 text-white" />
       </div>
+      </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-3 gap-[1vw]">
         <Panel title="Needs attention">
           {attention.length === 0 ? <Quiet>Nothing urgent. 👍</Quiet> : (
             <ul className="space-y-[0.7vw]">
-              {attention.slice(0, 6).map((w) => {
+              {attention.slice(0, attention.length > 5 ? 4 : 5).map((w) => {
                 const late = w.dueDate && woDay(w.dueDate) < todayKey;
                 return (
                   <li key={w.id} className={`rounded-[0.6vw] border-l-[0.4vw] bg-slate-800 px-[0.9vw] py-[0.6vw] ${w.priority === "HIGH" ? "border-red-500" : w.reported ? "border-amber-400" : "border-slate-500"}`}>
@@ -130,7 +144,7 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
                   </li>
                 );
               })}
-              {attention.length > 6 && <Quiet>+ {attention.length - 6} more</Quiet>}
+              {attention.length > 5 && <Quiet>+ {attention.length - 4} more</Quiet>}
             </ul>
           )}
         </Panel>
@@ -168,7 +182,7 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
           {!cal.configured ? <Quiet>Calendar not connected yet. Add Vlad&apos;s private calendar link as CALENDAR_ICS_URL.</Quiet>
             : cal.events.length === 0 ? <Quiet>Nothing on the calendar this week.</Quiet> : (
               <div className="space-y-[0.8vw]">
-                {groupBy(cal.events.slice(0, 14), (e: CalEvent) => (e.allDay ? woDay(e.start) : localDay(e.start))).map(([day, rows]) => (
+                {groupBy(cal.events.slice(0, 10), (e: CalEvent) => (e.allDay ? woDay(e.start) : localDay(e.start))).map(([day, rows]) => (
                   <div key={day}>
                     <div className={`text-[1.1vw] font-semibold ${day === todayKey ? "text-sky-300" : "text-slate-300"}`}>{dayLabel(day, todayKey)}</div>
                     {rows.map((e, i) => (
@@ -185,7 +199,7 @@ export default async function TvPage({ searchParams }: { searchParams: Promise<{
           {lowStock.length > 0 && (
             <div className="mt-[1.2vw] border-t border-slate-700 pt-[0.8vw]">
               <div className="mb-[0.4vw] text-[1vw] font-semibold tracking-wider text-slate-400 uppercase">Low on stock</div>
-              {lowStock.slice(0, 5).map((p) => (
+              {lowStock.slice(0, 3).map((p) => (
                 <div key={p.name} className="flex justify-between text-[1.15vw]">
                   <span className="truncate">{p.name}</span>
                   <span className="shrink-0 text-violet-300">{p.inStock} left (min {p.minimum})</span>

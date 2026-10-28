@@ -41,6 +41,7 @@ export default async function MorePage() {
               ) : (
                 <p className="text-sm text-slate-600">Set TV_KEY in the server settings to get a sign-in-free link for the office TV. <a href="/tv" className="text-brand-700 underline">Preview the board</a></p>
               )}
+              <a href="/art" className="mt-3 block text-sm text-brand-700 underline">Paintings on the TV</a>
             </Card>
           </Section>
         </div>

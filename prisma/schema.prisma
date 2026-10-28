@@ -330,3 +330,14 @@ model Attachment {
   location    Location?  @relation(fields: [locationId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 }
+
+// Paintings shown across the top of the office TV board.
+model Artwork {
+  id         String   @id @default(cuid())
+  title      String
+  artist     String?
+  credit     String?
+  storageKey String   @unique
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}

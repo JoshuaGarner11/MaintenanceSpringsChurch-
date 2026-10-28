@@ -14,7 +14,7 @@ inspections, assets, locations, parts and checklists, built for phones first.
 | Assets | Details, photos, full history, parent/child (e.g. Horn Strobe is part of Fire Alarms), printable QR labels |
 | Locations | Areas and rooms with their history |
 | Report a problem | A printable QR sign per room (Locations → Report signs). Anyone scans it, picks what's wrong, adds a photo if they like, and it becomes a work order for that room. No sign-in. Repeat reports of the same problem are added to the open order |
-| Office TV | `/tv` is a full-screen board for a TV: new reports, overdue, the next 7 days, inspections coming up, low stock and Vlad's calendar. Refreshes itself every minute; the TV uses a private link (More → Office TV) instead of signing in |
+| Office TV | `/tv` is a full-screen board for a TV: new reports, overdue, the next 7 days, inspections coming up, low stock and Vlad's calendar. Refreshes itself every minute; the TV uses a private link (More → Office TV) instead of signing in. A painting runs across the top and changes hourly: 22 public-domain Albert Bierstadt landscapes are added on first start, and admins can upload more under More → Paintings on the TV |
 | Alerts | Admins get a push notification on their phone for each new report (More → Turn on alerts), or an email if they haven't turned alerts on |
 | Parts | Stock, minimums, restock and counts; stock drops when a part is logged on a work order |
 | Overview | Open, overdue, done this month, low stock, failed inspections with no repair |
